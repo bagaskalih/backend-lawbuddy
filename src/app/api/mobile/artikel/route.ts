@@ -1,32 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 
-const secret = process.env.NEXTAUTH_SECRET!;
-const prisma = new PrismaClient();
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers":
+        "Authorization, Content-Type, X-Requested-With",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
 
-export async function GET(request: Request) {
-  const nextReq = new NextRequest(request);
-  const token = await getToken({ req: nextReq, secret });
-
-  console.log("Token:", nextReq.headers.get("authorization"));
-
-  if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function GET(req: NextRequest) {
   try {
-    const artikels = await prisma.artikel.findMany({
-      where: { authorId: token.id },
-      orderBy: { createdAt: "desc" },
+    console.log(req);
+    const artikel = await prisma.artikel.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        category: true,
+        Comment: true,
+      },
     });
 
-    return NextResponse.json(artikels);
+    return new NextResponse(JSON.stringify(artikel), {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
-    console.error("Error fetching articles:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch articles" },
-      { status: 500 }
+    console.error("Error fetching artikel:", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Internal Server Error" }),
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }

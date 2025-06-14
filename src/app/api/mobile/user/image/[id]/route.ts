@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { decode } from "next-auth/jwt";
 import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
@@ -10,18 +10,22 @@ const uploadDir = path.join(process.cwd(), "public/uploads");
 
 export async function POST(req: Request) {
   const nextReq = new NextRequest(req);
-  const token = await getToken({ req: nextReq, secret });
-
+  const token = req.headers.get("Authorization")?.split(" ")[1];
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const decodedToken = await decode({
+    token,
+    secret,
+  });
 
   // Ambil id dari URL
   const url = new URL(req.url);
   const segments = url.pathname.split("/");
   const id = segments[segments.length - 1];
 
-  if (token.id !== id) {
+  if (!decodedToken || decodedToken.id !== id) {
     return NextResponse.json(
       { error: "Forbidden: you can only update your own profile" },
       { status: 403 }
@@ -42,7 +46,9 @@ export async function POST(req: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${fileExt}`;
+    const fileName = `${Date.now()}-${Math.round(
+      Math.random() * 1e9
+    )}.${fileExt}`;
     const filePath = path.join(uploadDir, fileName);
 
     fs.writeFileSync(filePath, buffer);
@@ -61,6 +67,9 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to upload image" },
+      { status: 500 }
+    );
   }
 }
