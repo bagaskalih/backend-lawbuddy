@@ -164,7 +164,7 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         reservedDates: {
-          set: formattedReservedDates,
+          push: new Date(formattedReservedDates),
         },
       },
     });
@@ -173,7 +173,7 @@ export async function PUT(req: Request) {
       where: { id: idLawyer },
       data: {
         reservedDates: {
-          set: formattedReservedDates,
+          push: new Date(formattedReservedDates),
         },
       },
       select: {
