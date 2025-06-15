@@ -65,6 +65,7 @@ export async function GET(req: Request) {
         price: true,
         rating: true,
         image: true,
+        reservedDates: true,
         createdAt: true,
         updatedAt: true,
       },
