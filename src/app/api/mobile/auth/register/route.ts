@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     });
 
     return new Response(
-      JSON.stringify({ user: { id: newUser.id, name, email }, token }),
+      JSON.stringify({ user: { id: newUser.id, role: newUser.role }, token }),
       {
         status: 201,
         headers: {

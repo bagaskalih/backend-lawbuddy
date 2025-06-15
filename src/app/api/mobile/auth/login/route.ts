@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
 
-  return new Response(JSON.stringify({ token }), {
+  return new Response(JSON.stringify({ token, user }), {
     status: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
