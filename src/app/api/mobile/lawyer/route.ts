@@ -142,7 +142,12 @@ export async function PUT(req: Request) {
     const requestBody = await req.json();
     const { idLawyer, reservedDates } = requestBody;
 
-    if (!idLawyer || !reservedDates) {
+    // format reservedDates to from string to Date
+    const formattedReservedDates = reservedDates.map(
+      (date: string) => new Date(date)
+    );
+
+    if (!idLawyer || !formattedReservedDates) {
       return new Response(
         JSON.stringify({ error: "All fields are required" }),
         {
@@ -159,7 +164,7 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         reservedDates: {
-          set: reservedDates,
+          set: formattedReservedDates,
         },
       },
     });
@@ -168,7 +173,7 @@ export async function PUT(req: Request) {
       where: { id: idLawyer },
       data: {
         reservedDates: {
-          set: reservedDates,
+          set: formattedReservedDates,
         },
       },
       select: {
