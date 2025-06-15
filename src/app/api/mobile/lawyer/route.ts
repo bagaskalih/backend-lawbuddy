@@ -195,6 +195,9 @@ export async function PUT(req: Request) {
       });
     }
 
+    console.log("Updated lawyer:", updatedLawyer);
+    console.log("Updated user:", updatedUser);
+
     return new Response(JSON.stringify(updatedLawyer), {
       status: 200,
       headers: {
